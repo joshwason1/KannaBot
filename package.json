@@ -1,0 +1,31 @@
+{
+  "name": "kannabot",
+  "version": "1.0.0",
+  "description": "A discord bot with a cute appearance",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshwason1/KannaBot.git"
+  },
+  "keywords": [
+    "Discord",
+    "bot",
+    "anime",
+    "Kanna"
+  ],
+  "author": "Josh Wason",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshwason1/KannaBot/issues"
+  },
+  "homepage": "https://github.com/joshwason1/KannaBot#readme",
+  "dependencies": {
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "discord-api-types": "^0.23.1",
+    "discord.js": "^13.1.0"
+  }
+}
