@@ -1,11 +1,14 @@
 // Require the necessary discord.js classes
 const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
+const { createAudioPlayer } = require('@discordjs/voice');
 const { token } = require('./config.json');
-const freedom = require('./freedom.js')
+const covidlive = require('./covidlive.js');
+const music = require('./music.js');
+
 
 // Create a new client instance
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
 
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -17,10 +20,16 @@ for (const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
+const player = createAudioPlayer();
+
 // When the client is ready, run this code (only once)
 client.once('ready', c => {
 	console.log(`Ready! Logged in as ${c.user.tag}.`);
-    freedom.freedom(c);
+    covidlive.freedom(c);
+    
+    client.user.setPresence({activities: [{name: 'VC and crying because of Nicole...', type: 'LISTENING'}]});
+
+    music.initialise();
 });
 
 client.on('interactionCreate', async interaction => {
@@ -31,11 +40,15 @@ client.on('interactionCreate', async interaction => {
     if(!command) return;
 
     try {
-        await command.execute(interaction);
+        await command.execute(interaction, player);
     
     } catch (error) {
         console.error(error);
-        await interaction.reply({content: 'There was an error while executing this command', ephemeral: true});
+        if (interaction.replied) {
+            await interaction.followUp({content: 'There was an error while executing this command', ephemeral: true});
+        }  else {
+            await interaction.reply({content: 'There was an error while executing this command', ephemeral: true});
+        }
     }
 
 });  

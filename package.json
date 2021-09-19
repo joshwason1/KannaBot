@@ -14,7 +14,8 @@
     "Discord",
     "bot",
     "anime",
-    "Kanna"
+    "Kanna",
+    "music"
   ],
   "author": "Josh Wason",
   "license": "ISC",
@@ -24,10 +25,16 @@
   "homepage": "https://github.com/joshwason1/KannaBot#readme",
   "dependencies": {
     "@discordjs/builders": "^0.6.0",
+    "@discordjs/opus": "^0.5.3",
     "@discordjs/rest": "^0.1.0-canary.0",
+    "@discordjs/voice": "^0.6.0",
     "axios": "^0.21.4",
     "cheerio": "^1.0.0-rc.10",
     "discord-api-types": "^0.23.1",
-    "discord.js": "^13.1.0"
+    "discord.js": "^13.1.0",
+    "ffmpeg-static": "^4.4.0",
+    "libsodium-wrappers": "^0.7.9",
+    "youtube-sr": "^4.1.7",
+    "ytdl-core": "^4.9.1"
   }
 }
