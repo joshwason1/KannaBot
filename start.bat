@@ -1,0 +1,6 @@
+@echo off
+echo Starting...
+:main
+node .
+echo The bot crashed! Restarting...
+goto main

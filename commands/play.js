@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { Message, VoiceChannel } = require('discord.js');
-const fs = require('fs');
-const { joinVoiceChannel, createAudioResource, createAudioPlayer, AudioPlayerStatus, NoSubscriberBehavior, StreamType, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioResource, AudioPlayerStatus, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
 const YTSearch = require('youtube-sr').default;
 const ytdl = require('ytdl-core');
 
@@ -13,11 +12,9 @@ module.exports = {
             option.setName('search')
             .setDescription('Enter a search term or a YouTube URL')
             .setRequired(true)),
-	async execute(interaction, player) {
+	async execute(interaction, player, queue) {
         await interaction.deferReply({ephemeral:true});
         
-        //const serverQueue = fs.readFileSync(JSON.parse('../queue.json'));
-
         try {
             const voiceChannel = interaction.member.voice.channel;
             if (!voiceChannel)
@@ -50,25 +47,42 @@ module.exports = {
                 guildId: interaction.guildId,
                 adapterCreator: interaction.guild.voiceAdapterCreator,
             });
-            
-            
 
-            const resource = createAudioResource(ytdl(song.url), {
-                inputType: StreamType.Arbitrary,
-            });
+            if (!queue.has(interaction.guildId)) {
+                queue.set(interaction.guildId, {songs:[], channel:interaction.channel})
+            }
+            queue.get(interaction.guildId).songs.push(createAudioResource(ytdl(song.url),{
+                metadata: {
+                    title: song.title,
+                }
+            }));
 
+            await interaction.followUp({content:`${song.title} has been added to the queue`, ephemeral:true});
             
             connection.subscribe(player);
             await entersState(connection,VoiceConnectionStatus.Ready);
-            player.play(resource);
-                    
+            
+            if (queue.get(interaction.guildId).songs.length == 1) {
+                playQueue(queue, interaction, connection);
+            }
 
-            await interaction.followUp({content:`Now Playing: **${song.title}**`, ephemeral:true});
         } catch (error) {
             console.error(error);
         }
-        
-    }
 
-        
+        async function playQueue (queue, interaction, connection) {
+            if (queue.get(interaction.guildId).songs.length > 0) {
+                player.play(queue.get(interaction.guildId).songs[0]);
+                queue.get(interaction.guildId).channel.send(`Now Playing: **${queue.get(interaction.guildId).songs[0].metadata.title}**`);
+                player.once(AudioPlayerStatus.Idle, () => {
+                    queue.get(interaction.guildId).songs.shift();
+                    playQueue(queue, interaction, connection);
+                });
+            } else {
+                interaction.channel.send('End of queue');
+                connection.destroy();
+            }
+        }
+    }   
 };
+
